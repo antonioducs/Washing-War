@@ -1,10 +1,11 @@
 import React, {Component} from 'react';
-import {StyleSheet, Text, View, StatusBar, TextInput, Dimensions, Image} from 'react-native';
+import {StyleSheet, Text, View, StatusBar, TextInput, Dimensions} from 'react-native';
 import {TapGestureHandler, State} from 'react-native-gesture-handler'
 import Animated, {Easing} from 'react-native-reanimated'
+import Svg,{Image,Circle,ClipPath} from 'react-native-svg'
 
 const {height, width} = Dimensions.get('window'); //pega todo o tamanho da tela
-const {Value, event, block, cond, eq, set, Clock, startClock, stopClock, debug, timing, clockRunning, interpolate, Extrapolate} = Animated
+const {Value, event, block, cond, eq, set, Clock, startClock, stopClock, debug, timing, clockRunning, interpolate, Extrapolate, concat} = Animated
 
 function runTiming(clock, value, dest) {
   const state = {
@@ -58,7 +59,7 @@ class Welcome extends Component{
 
     this.bgA = interpolate(this.buttonOpacity,{
       inputRange:[0,1],
-      outputRange:[-height/3,0],
+      outputRange:[-height/3 - 50,0],
       extrapolate: Extrapolate.CLAMP
     });
 
@@ -79,6 +80,20 @@ class Welcome extends Component{
       outputRange:[1,0],
       extrapolate: Extrapolate.CLAMP
     });
+
+    this.rotateCross = interpolate(this.buttonOpacity,{
+      inputRange:[0,1],
+      outputRange:[180,360],
+      extrapolate: Extrapolate.CLAMP
+    });
+
+    this.onCloseState = event([
+      {
+        nativeEvent:({state})=>block([
+          cond(eq(state,State.END), set(this.buttonOpacity,runTiming(new Clock(),0,1)))
+        ])
+      }
+    ]);
   }
 
   render(){
@@ -91,7 +106,16 @@ class Welcome extends Component{
       }}>
 
         <Animated.View style={{ ...StyleSheet.absoluteFill,  transform:[{translateY: this.bgA}]}}>
-        <Image  source={require('../assets/bg.jpg')} style={{ flex: 1, height: null, width: null }}/>
+          <Svg height={height+50} width={width+10}>
+            <ClipPath id='clip'>
+              <Circle r={height+50}
+              cx={(width+10)/2}/>
+            </ClipPath>   
+            <Image  href={require('../assets/bg.jpg')}
+            height={height+50} width={width+10}
+            preserveAspectRatio='xMidYMid slice'
+            clipPath='url(#clip)'/>
+          </Svg>
         </Animated.View>
 
       <StatusBar
@@ -118,6 +142,16 @@ class Welcome extends Component{
           ...StyleSheet.absoluteFill,
           top:null,
           justifyContent:'center'}}>
+
+          <TapGestureHandler onHandlerStateChange={this.onCloseState}>
+            <Animated.View style={styles.closeButton}>
+              <Animated.Text style={{
+                fontSize:15,
+                transform:[{rotate:concat(this.rotateCross, 'deg')}]}}>
+                X
+              </Animated.Text>
+            </Animated.View>
+          </TapGestureHandler>
 
           <TextInput placeholder='E-mail'
             style={styles.textInput}
@@ -146,16 +180,16 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent'
   },
   button: {
-    shadowOffset: { width: 2, height: 2 },
-    shadowColor: 'black',
-    shadowOpacity: 0.2,
     backgroundColor: 'white',
     height: 70,
     marginHorizontal: 20,
     borderRadius: 35,
     alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: 5
+    marginVertical: 5,
+    shadowColor: 'black',
+    shadowOpacity: 0.2,
+    elevation: 4
   },
   textInput:{
     height:50,
@@ -165,5 +199,19 @@ const styles = StyleSheet.create({
     paddingLeft:10,
     marginVertical:5,
     borderColor:'black'
+  },
+  closeButton:{
+    height:40,
+    width:40,
+    backgroundColor: 'white',
+    borderRadius:20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'absolute',
+    top: -20,
+    left: width/2 - 20,
+    shadowColor: 'black',
+    shadowOpacity: 0.2,
+    elevation: 4
   }
 });
