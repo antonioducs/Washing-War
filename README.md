@@ -1,2 +1,3 @@
-# Washing-War
-Gerenciador de máquinas compartilhadas
+# War-Wash
+
+aplicativo para gerenciar lavanderias comunitárias
