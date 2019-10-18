@@ -10,8 +10,8 @@ export default class UserDetails extends Component {
 
     state = {
         img: imgPerfil,
-        nome: "Antonio César Duarte",
-        apt: 5
+        nome: "Leonardo Batista",
+        apt: 2
     };
 
     render() {
